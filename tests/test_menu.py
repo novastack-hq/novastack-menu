@@ -1,7 +1,7 @@
 """Dan's promises about the menu. Run them with:  uv run pytest"""
 
 import pytest
-
+import re
 from app import MENU, app
 
 
@@ -28,7 +28,16 @@ def test_every_item_has_the_five_fields():
     for item in MENU:
         assert set(item) == fields, item
 
-
 def test_skus_are_unique():
     skus = [item["sku"] for item in MENU]
     assert len(skus) == len(set(skus))
+
+MONEY = re.compile(r"\d+\.\d\d")  # two digits after the point: 4.50, 12.00
+
+
+def test_every_price_is_money():
+    for item in MENU:
+        assert MONEY.fullmatch(item["price"]), (
+            f"{item['sku']} {item['name']}: "
+            f"price {item['price']!r} is not money like '4.50'"
+        )
